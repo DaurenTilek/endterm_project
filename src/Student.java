@@ -8,4 +8,17 @@ public class Student {
         this.firstname = firstname;
         this.lastname = lastname;
     }
+
+    public int getSid() {return sid;}
+    public String getFirstname() {return firstname;}
+    public String getLastname() {return lastname;}
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "sid=" + sid +
+                ", firstname='" + firstname + '\'' +
+                ", lastname='" + lastname + '\'' +
+                '}';
+    }
 }
