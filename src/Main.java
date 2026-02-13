@@ -17,9 +17,12 @@ public class Main {
             System.out.println("3. Find a student by ID");
             System.out.println("4. List all books");
             System.out.println("5. Add a book");
-            System.out.println("6. Add a new loan");
-            System.out.println("7. List all loans");
-            System.out.println("0. Exit");
+            System.out.println("6. Find a book by ID");
+            System.out.println("7. Add a new loan");
+            System.out.println("8. List all loans");
+            System.out.println("9. Return a loaned book");
+            System.out.println("10. List all students who ever took a particular book");
+            System.out.println("16. Exit");
 
             int choice = scan.nextInt();
             if (choice == 0) break;
@@ -30,8 +33,11 @@ public class Main {
                 case 3: findsid(scan); break;
                 case 4: listbooks(); break;
                 case 5: addbook(scan); break;
-                case 6: issuebook(scan); break;
-                case 7: listloans(); break;
+                case 6: findbook(scan); break;
+                case 7: issuebook(scan); break;
+                case 8: listloans(); break;
+                case 9: returnbook(scan); break;
+                case 10:whoevertookaparticularbook(scan);break;
                 default: System.out.println("Invalid option");
             }
         }
@@ -135,6 +141,28 @@ public class Main {
         } catch (SQLException e)
             { System.out.println("error: " + e.getMessage()); }
     }
+    private static void findbook(Scanner scan) {
+        System.out.print("enter bid to find: ");
+        int bid = scan.nextInt();
+
+        String sql = "SELECT * FROM books WHERE bid = ?";
+        try (Connection conn = DriverManager.getConnection(URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, bid);
+            ResultSet res = pstmt.executeQuery();
+
+            if (res.next()) {
+                System.out.println("ID: " + res.getInt("bid"));
+                System.out.println("Title: " + res.getString("title"));
+                System.out.println("Author: " + res.getString("author"));
+                System.out.println("Pages: " + res.getInt("pages"));
+            } else {
+                System.out.println("not found "+bid);
+            }
+        } catch (SQLException e) {
+            System.out.println("error:" + e.getMessage());
+        }
+    }
     private static void issuebook(Scanner scan) {
         System.out.print("Enter sid:");
         int sid = scan.nextInt();
@@ -166,4 +194,40 @@ public class Main {
             System.out.println("error: " + e.getMessage());
         }
     }
+    private static void returnbook(Scanner scan) {
+        System.out.print("enter student id:");
+        int sid = scan.nextInt();
+        System.out.print("enter book id:");
+        int bid = scan.nextInt();
+
+        String sql = "DELETE FROM loans WHERE sid = ? AND bid = ?";
+        try (Connection conn = DriverManager.getConnection(URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, sid);
+            pstmt.setInt(2, bid);
+            int rows = pstmt.executeUpdate();
+            if (rows > 0) {
+                System.out.println("book returned");
+            } else {
+                System.out.println("no such loan found");
+            }
+        } catch (SQLException e) {
+            System.out.println("error: " + e.getMessage());
+        }
+    }
+    private static void whoevertookaparticularbook(Scanner scan) {
+        System.out.print("enter bid: ");
+        int bid = scan.nextInt();
+        String sql = "SELECT s.firstname FROM students s JOIN loans l ON s.sid = l.sid WHERE l.bid = ?";
+        try (Connection conn = DriverManager.getConnection(URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, bid);
+            ResultSet res = pstmt.executeQuery();
+            System.out.println("readers:");
+            while (res.next())
+                System.out.println( res.getString("firstname"));
+        }
+        catch (SQLException e)
+        { System.out.println("Error: " + e.getMessage()); }
+}
 }
