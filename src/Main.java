@@ -1,8 +1,10 @@
 import java.sql.*;
 import java.util.Scanner;
 
+
 public class Main {
     private static final String URL = "jdbc:sqlite:library.db";
+
 
     public static void main(String[] args) {
         initialdb();
@@ -13,6 +15,8 @@ public class Main {
             System.out.println("1. List all students");
             System.out.println("2. Add a student");
             System.out.println("3. Find a student by ID");
+            System.out.println("4. List all books");
+            System.out.println("5. Add a book");
             System.out.println("0. Exit");
 
             int choice = scan.nextInt();
@@ -22,12 +26,19 @@ public class Main {
                 case 1: liststudents(); break;
                 case 2: addstudent(scan); break;
                 case 3: findsid(scan); break;
+                case 4: listbooks(); break;
+                case 5: addbook(scan); break;
                 default: System.out.println("Invalid option");
             }
         }
     }
 
     private static void initialdb() {
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            System.out.println("Driver class not found: " + e.getMessage());
+        }
         try (Connection conn = DriverManager.getConnection(URL);
              Statement stmt = conn.createStatement()) {
 
@@ -90,5 +101,34 @@ public class Main {
         } catch (SQLException e) {
             System.out.println("error:" + e.getMessage());
         }
+    }
+    private static void listbooks() {
+        try (Connection conn = DriverManager.getConnection(URL);
+             Statement stmt = conn.createStatement();
+             ResultSet res = stmt.executeQuery("SELECT * FROM books")) {
+            while (res.next()) {
+                System.out.println("ID: " + res.getInt("bid") + "Title: " + res.getString("title") + "Author: " + res.getString("author"));
+            }
+        } catch (SQLException e)
+        { System.out.println("еrror: " + e.getMessage()); }
+    }
+
+    private static void addbook(Scanner scan) {
+        System.out.print("еnter bid: "); int bid = scan.nextInt();
+        scan.nextLine();
+        System.out.print("title:"); String title = scan.nextLine();
+        System.out.print("author:"); String author = scan.nextLine();
+        System.out.print("pages:"); int pages = scan.nextInt();
+
+        try (Connection conn = DriverManager.getConnection(URL);
+             PreparedStatement stmt = conn.prepareStatement("INSERT INTO books VALUES(?,?,?,?)")) {
+            stmt.setInt(1, bid);
+            stmt.setString(2, title);
+            stmt.setString(3, author);
+            stmt.setInt(4, pages);
+            stmt.executeUpdate();
+            System.out.println("book added");
+        } catch (SQLException e)
+            { System.out.println("error: " + e.getMessage()); }
     }
 }
