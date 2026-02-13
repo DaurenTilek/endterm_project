@@ -20,6 +20,7 @@ public class Main {
 
             switch (choice) {
                 case 1: liststudents(); break;
+                case 2: addstudent(scan); break;
                 default: System.out.println("Invalid option");
             }
         }
@@ -49,6 +50,26 @@ public class Main {
             }
         } catch (SQLException e) {
             System.out.println("Error: " + e.getMessage());
+        }
+    }
+    private static void addstudent(Scanner scanner) {
+        System.out.print("Eenter studentid:");
+        int sid = scanner.nextInt();
+        System.out.print("firstname:");
+        String fn = scanner.next();
+        System.out.print("lastname:");
+        String ln = scanner.next();
+
+        String sql = "INSERT INTO students(sid, firstname, lastname) VALUES(?,?,?)";
+        try (Connection conn = DriverManager.getConnection(URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, sid);
+            pstmt.setString(2, fn);
+            pstmt.setString(3, ln);
+            pstmt.executeUpdate();
+            System.out.println("student added");
+        } catch (SQLException e) {
+            System.out.println("Error:" + e.getMessage());
         }
     }
 
