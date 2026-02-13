@@ -18,6 +18,7 @@ public class Main {
             System.out.println("4. List all books");
             System.out.println("5. Add a book");
             System.out.println("6. Add a new loan");
+            System.out.println("7. List all loans");
             System.out.println("0. Exit");
 
             int choice = scan.nextInt();
@@ -30,6 +31,7 @@ public class Main {
                 case 4: listbooks(); break;
                 case 5: addbook(scan); break;
                 case 6: issuebook(scan); break;
+                case 7: listloans(); break;
                 default: System.out.println("Invalid option");
             }
         }
@@ -149,6 +151,19 @@ public class Main {
             System.out.println("Book " + bid + " issued to student " + sid + " оn" + date);
         } catch (SQLException e) {
             System.out.println("Error issuing book: " + e.getMessage());
+        }
+    }
+    private static void listloans() {
+        String sql = "SELECT * FROM loans";
+        try (Connection conn = DriverManager.getConnection(URL);
+             Statement stmt = conn.createStatement();
+             ResultSet res = stmt.executeQuery(sql)) {
+            System.out.println("all Loans");
+            while (res.next()) {
+                System.out.println("student ID: " + res.getInt("sid") + "book ID: " + res.getInt("bid") + "date: " + res.getString("issue_date"));
+            }
+        } catch (SQLException e) {
+            System.out.println("error: " + e.getMessage());
         }
     }
 }
