@@ -17,11 +17,14 @@ public class Main {
 
             int choice = scan.nextInt();
             if (choice == 0) break;
+
             switch (choice) {
-                default: System.out.println("invalid option");
+                case 1: liststudents(); break;
+                default: System.out.println("Invalid option");
             }
         }
     }
+
     private static void initialdb() {
         try (Connection conn = DriverManager.getConnection(URL);
              Statement stmt = conn.createStatement()) {
@@ -32,10 +35,22 @@ public class Main {
 
             stmt.execute("CREATE TABLE loans(lid INTEGER PRIMARY KEY AUTOINCREMENT, sid INT, bid INT, loan_date DATE, return_date DATE, FOREIGN KEY (sid) REFERENCES students(sid), FOREIGN KEY (bid) REFERENCES books(bid))");
 
-            System.out.println("database initialized");
+            System.out.println("Database initialized.");
         } catch (SQLException e) {
-            System.out.println("init error:" + e.getMessage());
+            System.out.println("Init error: " + e.getMessage());
         }
     }
+    private static void liststudents() {
+        try (Connection conn = DriverManager.getConnection(URL);
+             Statement stmt = conn.createStatement();
+             ResultSet res = stmt.executeQuery("SELECT * FROM students")) {
+            while (res.next()) {
+                System.out.println("studentid:" + res.getInt("sid") + " " + res.getString("firstname") + " " + res.getString("lastname"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
 
 }
