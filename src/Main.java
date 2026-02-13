@@ -17,6 +17,7 @@ public class Main {
             System.out.println("3. Find a student by ID");
             System.out.println("4. List all books");
             System.out.println("5. Add a book");
+            System.out.println("6. Add a new loan");
             System.out.println("0. Exit");
 
             int choice = scan.nextInt();
@@ -28,6 +29,7 @@ public class Main {
                 case 3: findsid(scan); break;
                 case 4: listbooks(); break;
                 case 5: addbook(scan); break;
+                case 6: issuebook(scan); break;
                 default: System.out.println("Invalid option");
             }
         }
@@ -42,11 +44,11 @@ public class Main {
         try (Connection conn = DriverManager.getConnection(URL);
              Statement stmt = conn.createStatement()) {
 
-            stmt.execute("CREATE TABLE students(sid INT PRIMARY KEY, firstname VARCHAR(50), lastname VARCHAR(50))");
+            stmt.execute("CREATE TABLE IF NOT EXISTS students(sid INT PRIMARY KEY, firstname VARCHAR(50), lastname VARCHAR(50))");
 
-            stmt.execute("CREATE TABLE books(bid INT PRIMARY KEY, title VARCHAR(50), author VARCHAR(50), pages INT)");
+            stmt.execute("CREATE TABLE IF NOT EXISTS books(bid INT PRIMARY KEY, title VARCHAR(50), author VARCHAR(50), pages INT)");
 
-            stmt.execute("CREATE TABLE loans(lid INTEGER PRIMARY KEY AUTOINCREMENT, sid INT, bid INT, loan_date DATE, return_date DATE, FOREIGN KEY (sid) REFERENCES students(sid), FOREIGN KEY (bid) REFERENCES books(bid))");
+            stmt.execute("CREATE TABLE IF NOT EXISTS loans(lid INTEGER PRIMARY KEY AUTOINCREMENT, sid INT, bid INT, loan_date DATE, return_date DATE, FOREIGN KEY (sid) REFERENCES students(sid), FOREIGN KEY (bid) REFERENCES books(bid))");
 
             System.out.println("Database initialized.");
         } catch (SQLException e) {
@@ -130,5 +132,23 @@ public class Main {
             System.out.println("book added");
         } catch (SQLException e)
             { System.out.println("error: " + e.getMessage()); }
+    }
+    private static void issuebook(Scanner scan) {
+        System.out.print("Enter sid:");
+        int sid = scan.nextInt();
+        System.out.print("Enter bid:");
+        int bid = scan.nextInt();
+        String date = java.time.LocalDate.now().toString();
+
+        try (Connection conn = DriverManager.getConnection(URL);
+             PreparedStatement pstmt = conn.prepareStatement("INSERT INTO loans (sid, bid, issue_date) VALUES (?, ?, ?)")) {
+            pstmt.setInt(1, sid);
+            pstmt.setInt(2, bid);
+            pstmt.setString(3, date);
+            pstmt.executeUpdate();
+            System.out.println("Book " + bid + " issued to student " + sid + " оn" + date);
+        } catch (SQLException e) {
+            System.out.println("Error issuing book: " + e.getMessage());
+        }
     }
 }
