@@ -22,6 +22,7 @@ public class Main {
             System.out.println("8. List all loans");
             System.out.println("9. Return a loaned book");
             System.out.println("10. List all students who ever took a particular book");
+            System.out.println("11. List all loaned but not yet returned books of a student");
             System.out.println("16. Exit");
 
             int choice = scan.nextInt();
@@ -38,6 +39,7 @@ public class Main {
                 case 8: listloans(); break;
                 case 9: returnbook(scan); break;
                 case 10:whoevertookaparticularbook(scan);break;
+                case 11: loanedbutnotyetreturnedbooksofastudent(scan); break;
                 default: System.out.println("Invalid option");
             }
         }
@@ -230,4 +232,19 @@ public class Main {
         catch (SQLException e)
         { System.out.println("Error: " + e.getMessage()); }
 }
+    private static void loanedbutnotyetreturnedbooksofastudent(Scanner scan) {
+        System.out.print("enter sid: ");
+        int sid = scan.nextInt();
+        String sql = "SELECT b.title FROM books b JOIN loans l ON b.bid = l.bid WHERE l.sid = ?";
+        try (Connection conn = DriverManager.getConnection(URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, sid);
+            ResultSet res = pstmt.executeQuery();
+            System.out.println("books on hand:");
+            while (res.next())
+                System.out.println( res.getString("title"));
+        }
+        catch (SQLException e)
+        { System.out.println("еrror:" + e.getMessage()); }
+    }
 }
