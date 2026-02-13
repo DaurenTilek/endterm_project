@@ -21,6 +21,7 @@ public class Main {
             switch (choice) {
                 case 1: liststudents(); break;
                 case 2: addstudent(scan); break;
+                case 3: findsid(scan); break;
                 default: System.out.println("Invalid option");
             }
         }
@@ -73,5 +74,21 @@ public class Main {
         }
     }
 
-
+    private static void findsid(Scanner scanner) {
+        System.out.print("Enter studentid to find: ");
+        int sid = scanner.nextInt();
+        String sql = "SELECT * FROM students WHERE sid = ?";
+        try (Connection conn = DriverManager.getConnection(URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, sid);
+            ResultSet res = pstmt.executeQuery();
+            if (res.next()) {
+                System.out.println("found student:" + res.getString("firstname") + " " + res.getString("lastname"));
+            } else {
+                System.out.println("student not found.");
+            }
+        } catch (SQLException e) {
+            System.out.println("error:" + e.getMessage());
+        }
+    }
 }
