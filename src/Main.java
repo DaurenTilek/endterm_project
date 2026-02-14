@@ -33,22 +33,23 @@ public class Main {
             if (choice == 0) break;
 
             switch (choice) {
-                case 1: liststudents();break;
-                case 2: addstudent(scan);break;
-                case 3: findsid(scan);break;
-                case 4: listbooks();break;
-                case 5: addbook(scan);break;
-                case 6: findbook(scan);break;
-                case 7: issuebook(scan);break;
-                case 8: listloans();break;
-                case 9: returnbook(scan);break;
-                case 10: whoevertookaparticularbook(scan);break;
-                case 11: loanedbutnotyetreturnedbooksofastudent(scan);break;
-                case 12: outputthetotalnumberofpagesastudenthasread(scan);break;
-                case 13: popularbook();break;
-                case 14: unpopularbook();break;
-                case 20: allbooksauthor(scan);break;
-                default: System.out.println("Invalid option");
+                case 1: liststudents(); break;
+                case 2: addstudent(scan); break;
+                case 3: findsid(scan); break;
+                case 4: listbooks(); break;
+                case 5: addbook(scan); break;
+                case 6: findbook(scan); break;
+                case 7: issuebook(scan); break;
+                case 8: listloans(); break;
+                case 9: returnbook(scan); break;
+                case 10: whoevertookaparticularbook(scan); break;
+                case 11: loanedbutnotyetreturnedbooksofastudent(scan); break;
+                case 12: outputthetotalnumberofpagesastudenthasread(scan); break;
+                case 13: popularbook(); break;
+                case 14: unpopularbook(); break;
+                case 15: allbooksauthor(scan); break;
+                case 16: System.out.println(); return;
+                default: System.out.println("invalid option");
             }
         }
     }
@@ -66,7 +67,8 @@ public class Main {
 
             stmt.execute("CREATE TABLE IF NOT EXISTS books(bid INT PRIMARY KEY, title VARCHAR(50), author VARCHAR(50), pages INT)");
 
-            stmt.execute("CREATE TABLE IF NOT EXISTS loans(lid INTEGER PRIMARY KEY AUTOINCREMENT, sid INT, bid INT, loan_date DATE, return_date DATE, FOREIGN KEY (sid) REFERENCES students(sid), FOREIGN KEY (bid) REFERENCES books(bid))");
+            stmt.execute("CREATE TABLE IF NOT EXISTS loans(" + "lid INTEGER PRIMARY KEY AUTOINCREMENT, " + "sid INT, " + "bid INT, " + "issue_date TEXT, " + "return_date TEXT, " +"FOREIGN KEY (sid) REFERENCES students(sid), " +
+                    "FOREIGN KEY (bid) REFERENCES books(bid))");
 
             System.out.println("Database initialized.");
         } catch (SQLException e) {
@@ -85,7 +87,7 @@ public class Main {
         }
     }
     private static void addstudent(Scanner scanner) {
-        System.out.print("Eenter studentid:");
+        System.out.print("enter studentid:");
         int sid = scanner.nextInt();
         System.out.print("firstname:");
         String fn = scanner.next();
@@ -127,7 +129,7 @@ public class Main {
              Statement stmt = conn.createStatement();
              ResultSet res = stmt.executeQuery("SELECT * FROM books")) {
             while (res.next()) {
-                System.out.println("ID: " + res.getInt("bid") + "Title: " + res.getString("title") + "Author: " + res.getString("author"));
+                System.out.println("ID: " + res.getInt("bid") + " Title: " + res.getString("title") + " Author: " + res.getString("author"));
             }
         } catch (SQLException e)
         { System.out.println("еrror: " + e.getMessage()); }
@@ -198,7 +200,7 @@ public class Main {
              ResultSet res = stmt.executeQuery(sql)) {
             System.out.println("all Loans");
             while (res.next()) {
-                System.out.println("student ID: " + res.getInt("sid") + "book ID: " + res.getInt("bid") + "date: " + res.getString("issue_date"));
+                System.out.println("sid: " + res.getInt("sid") + " book ID: " + res.getInt("bid") + " date: " + res.getString("issue_date"));
             }
         } catch (SQLException e) {
             System.out.println("error: " + e.getMessage());
@@ -228,18 +230,22 @@ public class Main {
     private static void whoevertookaparticularbook(Scanner scan) {
         System.out.print("enter bid: ");
         int bid = scan.nextInt();
-        String sql = "SELECT s.firstname FROM students s JOIN loans l ON s.sid = l.sid WHERE l.bid = ?";
+        String sql = "SELECT s.firstname, s.lastname FROM students s " + "JOIN loans l ON s.sid = l.sid WHERE l.bid = ?";
         try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, bid);
             ResultSet res = pstmt.executeQuery();
             System.out.println("readers:");
-            while (res.next())
-                System.out.println( res.getString("firstname"));
+            boolean found = false;
+            while (res.next()) {
+                found = true;
+                System.out.println(res.getString("firstname") + " " + res.getString("lastname"));
+            }
+            if (!found) System.out.println("No");
+        } catch (SQLException e) {
+            System.out.println("error: " + e.getMessage());
         }
-        catch (SQLException e)
-        { System.out.println("Error: " + e.getMessage()); }
-}
+    }
     private static void loanedbutnotyetreturnedbooksofastudent(Scanner scan) {
         System.out.print("enter sid: ");
         int sid = scan.nextInt();
@@ -275,7 +281,7 @@ public class Main {
              ResultSet res = stmt.executeQuery(sql)) {
             System.out.println("popular book");
             while (res.next()) {
-                System.out.println(res.getString("title") + "times borrowed: " + res.getInt("count"));
+                System.out.println(res.getString("title") + " times borrowed: " + res.getInt("count"));
             }
         } catch (SQLException e)
             { System.out.println("error:" + e.getMessage()); }
@@ -300,10 +306,10 @@ public class Main {
         }
     }
     private static void allbooksauthor(Scanner scan) {
-        System.out.print("enter author's name:");
+        System.out.print("Enter author's name: ");
         scan.nextLine();
         String author = scan.nextLine();
-        String sql = "SELECT * FROM books WHERE author LIKE ?";
+        String sql = "SELECT * FROM books WHERE LOWER(author) LIKE LOWER(?)";
         try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, "%" + author + "%");
@@ -312,13 +318,11 @@ public class Main {
             boolean found = false;
             while (res.next()) {
                 found = true;
-                System.out.println("id: " + res.getInt("bid") + "title: " + res.getString("title") + "pages: " + res.getInt("pages"));
+                System.out.println("id: " + res.getInt("bid") + " title: " + res.getString("title") + " pages: " + res.getInt("pages"));
             }
-            if (!found)
-                System.out.println("no books found for this author.");
-        }
-        catch (SQLException e) {
-            System.out.println("error: " + e.getMessage());
+            if (!found) System.out.println("not found");
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 }
