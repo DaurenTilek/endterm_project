@@ -14,16 +14,17 @@ public class Main {
             System.out.println("Welcome to Endterm Project 2525");
             System.out.println("1. List all students");
             System.out.println("2. Add a student");
-            System.out.println("3. Find a student by ID");
+            System.out.println("3. Find a student by id");
             System.out.println("4. List all books");
             System.out.println("5. Add a book");
-            System.out.println("6. Find a book by ID");
+            System.out.println("6. Find a book by id");
             System.out.println("7. Add a new loan");
             System.out.println("8. List all loans");
             System.out.println("9. Return a loaned book");
             System.out.println("10. List all students who ever took a particular book");
             System.out.println("11. List all loaned but not yet returned books of a student");
             System.out.println("12. Output the total number of pages a student has read");
+            System.out.println("13. Popular book");
             System.out.println("16. Exit");
 
             int choice = scan.nextInt();
@@ -42,6 +43,7 @@ public class Main {
                 case 10: whoevertookaparticularbook(scan);break;
                 case 11: loanedbutnotyetreturnedbooksofastudent(scan); break;
                 case 12: outputthetotalnumberofpagesastudenthasread(scan); break;
+                case 13: popularbook(); break;
                 default: System.out.println("Invalid option");
             }
         }
@@ -261,5 +263,17 @@ public class Main {
                 System.out.println("total pages: " + res.getInt(1));
         } catch (SQLException e) {
             System.out.println("error: " + e.getMessage()); }
+    }
+    private static void popularbook() {
+        String sql = "SELECT b.title, COUNT(l.bid) as count FROM books b " + "JOIN loans l ON b.bid = l.bid " + "GROUP BY b.bid ORDER BY count DESC";
+        try (Connection conn = DriverManager.getConnection(URL);
+             Statement stmt = conn.createStatement();
+             ResultSet res = stmt.executeQuery(sql)) {
+            System.out.println("popular book");
+            while (res.next()) {
+                System.out.println(res.getString("title") + "times borrowed: " + res.getInt("count"));
+            }
+        } catch (SQLException e)
+            { System.out.println("error:" + e.getMessage()); }
     }
 }
