@@ -4,8 +4,6 @@ import java.util.Scanner;
 
 public class Main {
     private static final String URL = "jdbc:sqlite:library.db";
-
-
     public static void main(String[] args) {
         initialdb();
         Scanner scan = new Scanner(System.in);
@@ -76,8 +74,8 @@ public class Main {
         }
     }
     private static void liststudents() {
-        try (Connection conn = DriverManager.getConnection(URL);
-             Statement stmt = conn.createStatement();
+        try (Connection connect = DriverManager.getConnection(URL);
+             Statement stmt = connect.createStatement();
              ResultSet res = stmt.executeQuery("SELECT * FROM students")) {
             while (res.next()) {
                 System.out.println("studentid:" + res.getInt("sid") + " " + res.getString("firstname") + " " + res.getString("lastname"));
@@ -96,14 +94,14 @@ public class Main {
 
         String sql = "INSERT INTO students(sid, firstname, lastname) VALUES(?,?,?)";
         try (Connection conn = DriverManager.getConnection(URL);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, sid);
-            pstmt.setString(2, fn);
-            pstmt.setString(3, ln);
-            pstmt.executeUpdate();
+             PreparedStatement pstamt = conn.prepareStatement(sql)) {
+            pstamt.setInt(1, sid);
+            pstamt.setString(2, fn);
+            pstamt.setString(3, ln);
+            pstamt.executeUpdate();
             System.out.println("student added");
         } catch (SQLException e) {
-            System.out.println("Error:" + e.getMessage());
+            System.out.println("error:" + e.getMessage());
         }
     }
 
@@ -111,8 +109,8 @@ public class Main {
         System.out.print("Enter studentid to find: ");
         int sid = scanner.nextInt();
         String sql = "SELECT * FROM students WHERE sid = ?";
-        try (Connection conn = DriverManager.getConnection(URL);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection connec = DriverManager.getConnection(URL);
+             PreparedStatement pstmt = connec.prepareStatement(sql)) {
             pstmt.setInt(1, sid);
             ResultSet res = pstmt.executeQuery();
             if (res.next()) {
@@ -125,11 +123,11 @@ public class Main {
         }
     }
     private static void listbooks() {
-        try (Connection conn = DriverManager.getConnection(URL);
-             Statement stmt = conn.createStatement();
+        try (Connection connec = DriverManager.getConnection(URL);
+             Statement stmt = connec.createStatement();
              ResultSet res = stmt.executeQuery("SELECT * FROM books")) {
             while (res.next()) {
-                System.out.println("ID: " + res.getInt("bid") + " Title: " + res.getString("title") + " Author: " + res.getString("author"));
+                System.out.println("id: " + res.getInt("bid") + " title: " + res.getString("title") + " author: " + res.getString("author"));
             }
         } catch (SQLException e)
         { System.out.println("еrror: " + e.getMessage()); }
@@ -232,9 +230,9 @@ public class Main {
         int bid = scan.nextInt();
         String sql = "SELECT s.firstname, s.lastname FROM students s " + "JOIN loans l ON s.sid = l.sid WHERE l.bid = ?";
         try (Connection conn = DriverManager.getConnection(URL);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, bid);
-            ResultSet res = pstmt.executeQuery();
+             PreparedStatement prepstmt = conn.prepareStatement(sql)) {
+            prepstmt.setInt(1, bid);
+            ResultSet res = prepstmt.executeQuery();
             System.out.println("readers:");
             boolean found = false;
             while (res.next()) {
@@ -251,9 +249,9 @@ public class Main {
         int sid = scan.nextInt();
         String sql = "SELECT b.title FROM books b JOIN loans l ON b.bid = l.bid WHERE l.sid = ?";
         try (Connection conn = DriverManager.getConnection(URL);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, sid);
-            ResultSet res = pstmt.executeQuery();
+             PreparedStatement prstmt = conn.prepareStatement(sql)) {
+            prstmt.setInt(1, sid);
+            ResultSet res = prstmt.executeQuery();
             System.out.println("books on hand:");
             while (res.next())
                 System.out.println( res.getString("title"));
@@ -266,9 +264,9 @@ public class Main {
         int sid = scan.nextInt();
         String sql = "SELECT SUM(b.pages) FROM books b JOIN loans l ON b.bid = l.bid WHERE l.sid = ?";
         try (Connection conn = DriverManager.getConnection(URL);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, sid);
-            ResultSet res = pstmt.executeQuery();
+             PreparedStatement prestmt = conn.prepareStatement(sql)) {
+            prestmt.setInt(1, sid);
+            ResultSet res = prestmt.executeQuery();
             if (res.next())
                 System.out.println("total pages: " + res.getInt(1));
         } catch (SQLException e) {
@@ -277,8 +275,8 @@ public class Main {
     private static void popularbook() {
         String sql = "SELECT b.title, COUNT(l.bid) as count FROM books b " + "JOIN loans l ON b.bid = l.bid " + "GROUP BY b.bid ORDER BY count DESC";
         try (Connection conn = DriverManager.getConnection(URL);
-             Statement stmt = conn.createStatement();
-             ResultSet res = stmt.executeQuery(sql)) {
+             Statement sttmt = conn.createStatement();
+             ResultSet res = sttmt.executeQuery(sql)) {
             System.out.println("popular book");
             while (res.next()) {
                 System.out.println(res.getString("title") + " times borrowed: " + res.getInt("count"));
@@ -289,8 +287,8 @@ public class Main {
     private static void unpopularbook() {
         String sql = "SELECT b.title, b.author FROM books b " + "LEFT JOIN loans l ON b.bid = l.bid " + "WHERE l.bid IS NULL";
         try (Connection conn = DriverManager.getConnection(URL);
-             Statement stmt = conn.createStatement();
-             ResultSet res = stmt.executeQuery(sql)) {
+             Statement statmt = conn.createStatement();
+             ResultSet res = statmt.executeQuery(sql)) {
             System.out.println("unpopular book");
             boolean found = false;
             while (res.next()) {
@@ -311,9 +309,9 @@ public class Main {
         String author = scan.nextLine();
         String sql = "SELECT * FROM books WHERE LOWER(author) LIKE LOWER(?)";
         try (Connection conn = DriverManager.getConnection(URL);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, "%" + author + "%");
-            ResultSet res = pstmt.executeQuery();
+             PreparedStatement prepastmt = conn.prepareStatement(sql)) {
+            prepastmt.setString(1, "%" + author + "%");
+            ResultSet res = prepastmt.executeQuery();
             System.out.println("books by " + author );
             boolean found = false;
             while (res.next()) {
