@@ -70,9 +70,9 @@ public class Main {
             stmt.execute("CREATE TABLE IF NOT EXISTS loans(" + "lid INTEGER PRIMARY KEY AUTOINCREMENT, " + "sid INT, " + "bid INT, " + "issue_date TEXT, " + "return_date TEXT, " +"FOREIGN KEY (sid) REFERENCES students(sid), " +
                     "FOREIGN KEY (bid) REFERENCES books(bid))");
 
-            System.out.println("Database initialized.");
+            System.out.println("Database initialized");
         } catch (SQLException e) {
-            System.out.println("Init error: " + e.getMessage());
+            System.out.println("init error: " + e.getMessage());
         }
     }
     private static void liststudents() {
