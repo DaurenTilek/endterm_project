@@ -26,26 +26,28 @@ public class Main {
             System.out.println("12. Output the total number of pages a student has read");
             System.out.println("13. Popular book");
             System.out.println("14. Unpopular book");
+            System.out.println("15. Аll books by an author");
             System.out.println("16. Exit");
 
             int choice = scan.nextInt();
             if (choice == 0) break;
 
             switch (choice) {
-                case 1: liststudents(); break;
-                case 2: addstudent(scan); break;
-                case 3: findsid(scan); break;
-                case 4: listbooks(); break;
-                case 5: addbook(scan); break;
-                case 6: findbook(scan); break;
-                case 7: issuebook(scan); break;
-                case 8: listloans(); break;
-                case 9: returnbook(scan); break;
+                case 1: liststudents();break;
+                case 2: addstudent(scan);break;
+                case 3: findsid(scan);break;
+                case 4: listbooks();break;
+                case 5: addbook(scan);break;
+                case 6: findbook(scan);break;
+                case 7: issuebook(scan);break;
+                case 8: listloans();break;
+                case 9: returnbook(scan);break;
                 case 10: whoevertookaparticularbook(scan);break;
-                case 11: loanedbutnotyetreturnedbooksofastudent(scan); break;
-                case 12: outputthetotalnumberofpagesastudenthasread(scan); break;
-                case 13: popularbook(); break;
-                case 14: unpopularbook(); break;
+                case 11: loanedbutnotyetreturnedbooksofastudent(scan);break;
+                case 12: outputthetotalnumberofpagesastudenthasread(scan);break;
+                case 13: popularbook();break;
+                case 14: unpopularbook();break;
+                case 20: allbooksauthor(scan);break;
                 default: System.out.println("Invalid option");
             }
         }
@@ -292,6 +294,28 @@ public class Main {
             if (!found) {
                 System.out.println("no unpopular book");
             }
+        }
+        catch (SQLException e) {
+            System.out.println("error: " + e.getMessage());
+        }
+    }
+    private static void allbooksauthor(Scanner scan) {
+        System.out.print("enter author's name:");
+        scan.nextLine();
+        String author = scan.nextLine();
+        String sql = "SELECT * FROM books WHERE author LIKE ?";
+        try (Connection conn = DriverManager.getConnection(URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, "%" + author + "%");
+            ResultSet res = pstmt.executeQuery();
+            System.out.println("books by " + author );
+            boolean found = false;
+            while (res.next()) {
+                found = true;
+                System.out.println("id: " + res.getInt("bid") + "title: " + res.getString("title") + "pages: " + res.getInt("pages"));
+            }
+            if (!found)
+                System.out.println("no books found for this author.");
         }
         catch (SQLException e) {
             System.out.println("error: " + e.getMessage());
