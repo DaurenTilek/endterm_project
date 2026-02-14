@@ -25,6 +25,7 @@ public class Main {
             System.out.println("11. List all loaned but not yet returned books of a student");
             System.out.println("12. Output the total number of pages a student has read");
             System.out.println("13. Popular book");
+            System.out.println("14. Unpopular book");
             System.out.println("16. Exit");
 
             int choice = scan.nextInt();
@@ -44,6 +45,7 @@ public class Main {
                 case 11: loanedbutnotyetreturnedbooksofastudent(scan); break;
                 case 12: outputthetotalnumberofpagesastudenthasread(scan); break;
                 case 13: popularbook(); break;
+                case 14: unpopularbook(); break;
                 default: System.out.println("Invalid option");
             }
         }
@@ -275,5 +277,24 @@ public class Main {
             }
         } catch (SQLException e)
             { System.out.println("error:" + e.getMessage()); }
+    }
+    private static void unpopularbook() {
+        String sql = "SELECT b.title, b.author FROM books b " + "LEFT JOIN loans l ON b.bid = l.bid " + "WHERE l.bid IS NULL";
+        try (Connection conn = DriverManager.getConnection(URL);
+             Statement stmt = conn.createStatement();
+             ResultSet res = stmt.executeQuery(sql)) {
+            System.out.println("unpopular book");
+            boolean found = false;
+            while (res.next()) {
+                found = true;
+                System.out.println("Title: " + res.getString("title") + "Author: " + res.getString("author"));
+            }
+            if (!found) {
+                System.out.println("no unpopular book");
+            }
+        }
+        catch (SQLException e) {
+            System.out.println("error: " + e.getMessage());
+        }
     }
 }
